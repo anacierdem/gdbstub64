@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fanacierdem%2Fgdbstub64.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fanacierdem%2Fgdbstub64?ref=badge_shield)
+
 gdbstub
 =======
 This is a simple gdb stub that can be easily dropped in to your project. It
@@ -18,3 +20,7 @@ License
 Licensed under GPL v2. See `LICENSE.txt` for full license.
 
 Matt Borgerson, 2016
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fanacierdem%2Fgdbstub64.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fanacierdem%2Fgdbstub64?ref=badge_large)
