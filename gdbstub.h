@@ -36,7 +36,7 @@
  ****************************************************************************/
 
 #if DEBUG
-#define DEBUG_PRINT(...) fprintf(stderr, __VA_ARGS__)
+#define DEBUG_PRINT(...) printf(stderr, __VA_ARGS__)
 #else
 #define DEBUG_PRINT(...)
 #endif
@@ -61,8 +61,7 @@
 	} \
 }
 #else
-#define ASSERT(x) \
-	do {} while (0)
+#define ASSERT(x)
 #endif
 #endif
 
@@ -70,7 +69,7 @@
  * Prototypes
  ****************************************************************************/
 
-int dbg_main(struct dbg_state *state);
+int dbg_main(); //struct dbg_state *state
 
 /* System functions, supported by all stubs */
 int dbg_sys_getc(void);

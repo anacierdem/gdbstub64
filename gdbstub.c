@@ -739,7 +739,7 @@ int dbg_read(char *buf, size_t buf_len, size_t len)
 /*
  * Main debug loop. Handles commands.
  */
-int dbg_main(struct dbg_state *state)
+int dbg_main() // struct dbg_state *state
 {
 	address     addr;
 	char        pkt_buf[256];
@@ -748,7 +748,7 @@ int dbg_main(struct dbg_state *state)
 	size_t      pkt_len;
 	const char *ptr_next;
 
-	dbg_send_signal_packet(pkt_buf, sizeof(pkt_buf), state->signum);
+	dbg_send_signal_packet(pkt_buf, sizeof(pkt_buf), 0);
 
 	while (1) {
 		/* Receive the next packet */
@@ -796,152 +796,154 @@ int dbg_main(struct dbg_state *state)
 		 * Read Registers
 		 * Command Format: g
 		 */
-		case 'g':
-			/* Encode registers */
-			status = dbg_enc_hex(pkt_buf, sizeof(pkt_buf),
-			                     (char *)&(state->registers),
-			                     sizeof(state->registers));
-			if (status == EOF) {
-				goto error;
-			}
-			pkt_len = status;
-			dbg_send_packet(pkt_buf, pkt_len);
-			break;
+		// case 'g':
+		// 	/* Encode registers */
+		// 	status = dbg_enc_hex(pkt_buf, sizeof(pkt_buf),
+		// 	                     (char *)&(state->registers),
+		// 	                     sizeof(state->registers));
+		// 	if (status == EOF) {
+		// 		goto error;
+		// 	}
+		// 	pkt_len = status;
+		// 	dbg_send_packet(pkt_buf, pkt_len);
+		// 	break;
 		
 		/*
 		 * Write Registers
 		 * Command Format: G XX...
 		 */
-		case 'G':
-			status = dbg_dec_hex(pkt_buf+1, pkt_len-1,
-			                     (char *)&(state->registers),
-			                     sizeof(state->registers));
-			if (status == EOF) {
-				goto error;
-			}
-			dbg_send_ok_packet(pkt_buf, sizeof(pkt_buf));
-			break;
+		// case 'G':
+		// 	status = dbg_dec_hex(pkt_buf+1, pkt_len-1,
+		// 	                     (char *)&(state->registers),
+		// 	                     sizeof(state->registers));
+		// 	if (status == EOF) {
+		// 		goto error;
+		// 	}
+		// 	dbg_send_ok_packet(pkt_buf, sizeof(pkt_buf));
+		// 	break;
 
 		/*
 		 * Read a Register
 		 * Command Format: p n
 		 */
-		case 'p':
-			ptr_next += 1;
-			token_expect_integer_arg(addr);
+		// case 'p':
+		// 	ptr_next += 1;
+		// 	token_expect_integer_arg(addr);
 
-			if (addr >= DBG_CPU_I386_NUM_REGISTERS) {
-				goto error;
-			}
+		// 	if (addr >= DBG_CPU_I386_NUM_REGISTERS) {
+		// 		goto error;
+		// 	}
 
-			/* Read Register */
-			status = dbg_enc_hex(pkt_buf, sizeof(pkt_buf),
-			                     (char *)&(state->registers[addr]),
-			                     sizeof(state->registers[addr]));
-			if (status == EOF) {
-				goto error;
-			}
-			dbg_send_packet(pkt_buf, status);
-			break;
+		// 	/* Read Register */
+		// 	status = dbg_enc_hex(pkt_buf, sizeof(pkt_buf),
+		// 	                     (char *)&(state->registers[addr]),
+		// 	                     sizeof(state->registers[addr]));
+		// 	if (status == EOF) {
+		// 		goto error;
+		// 	}
+		// 	dbg_send_packet(pkt_buf, status);
+		// 	break;
 		
 		/*
 		 * Write a Register
 		 * Command Format: P n...=r...
 		 */
-		case 'P':
-			ptr_next += 1;
-			token_expect_integer_arg(addr);
-			token_expect_seperator('=');
+		// case 'P':
+		// 	ptr_next += 1;
+		// 	token_expect_integer_arg(addr);
+		// 	token_expect_seperator('=');
 
-			if (addr < DBG_CPU_I386_NUM_REGISTERS) {
-				status = dbg_dec_hex(ptr_next, token_remaining_buf,
-				                     (char *)&(state->registers[addr]),
-				                     sizeof(state->registers[addr]));
-				if (status == EOF) {
-					goto error;
-				}
-			}
-			dbg_send_ok_packet(pkt_buf, sizeof(pkt_buf));
-			break;
+		// 	if (addr >= DBG_CPU_I386_NUM_REGISTERS) {
+		// 		goto error;
+		// 	}
+
+		// 	status = dbg_dec_hex(ptr_next, token_remaining_buf,
+		// 	                     (char *)&(state->registers[addr]),
+		// 	                     sizeof(state->registers[addr]));
+		// 	if (status == EOF) {
+		// 		goto error;
+		// 	}
+		// 	dbg_send_ok_packet(pkt_buf, sizeof(pkt_buf));
+		// 	break;
 		
 		/*
 		 * Read Memory
 		 * Command Format: m addr,length
 		 */
-		case 'm':
-			ptr_next += 1;
-			token_expect_integer_arg(addr);
-			token_expect_seperator(',');
-			token_expect_integer_arg(length);
+		// case 'm':
+		// 	ptr_next += 1;
+		// 	token_expect_integer_arg(addr);
+		// 	token_expect_seperator(',');
+		// 	token_expect_integer_arg(length);
 
-			/* Read Memory */
-			status = dbg_mem_read(pkt_buf, sizeof(pkt_buf),
-			                      addr, length, dbg_enc_hex);
-			if (status == EOF) {
-				goto error;
-			}
-			dbg_send_packet(pkt_buf, status);
-			break;
+		// 	/* Read Memory */
+		// 	status = dbg_mem_read(pkt_buf, sizeof(pkt_buf),
+		// 	                      addr, length, dbg_enc_hex);
+		// 	if (status == EOF) {
+		// 		goto error;
+		// 	}
+		// 	dbg_send_packet(pkt_buf, status);
+		// 	break;
 		
 		/*
 		 * Write Memory
 		 * Command Format: M addr,length:XX..
 		 */
-		case 'M':
-			ptr_next += 1;
-			token_expect_integer_arg(addr);
-			token_expect_seperator(',');
-			token_expect_integer_arg(length);
-			token_expect_seperator(':');
+		// case 'M':
+		// 	ptr_next += 1;
+		// 	token_expect_integer_arg(addr);
+		// 	token_expect_seperator(',');
+		// 	token_expect_integer_arg(length);
+		// 	token_expect_seperator(':');
 
-			/* Write Memory */
-			status = dbg_mem_write(ptr_next, token_remaining_buf,
-			                       addr, length, dbg_dec_hex);
-			if (status == EOF) {
-				goto error;
-			}
-			dbg_send_ok_packet(pkt_buf, sizeof(pkt_buf));
-			break;
+		// 	/* Write Memory */
+		// 	status = dbg_mem_write(ptr_next, token_remaining_buf,
+		// 	                       addr, length, dbg_dec_hex);
+		// 	if (status == EOF) {
+		// 		goto error;
+		// 	}
+		// 	dbg_send_ok_packet(pkt_buf, sizeof(pkt_buf));
+		// 	break;
 
 		/*
 		 * Write Memory (Binary)
 		 * Command Format: X addr,length:XX..
 		 */
-		case 'X':
-			ptr_next += 1;
-			token_expect_integer_arg(addr);
-			token_expect_seperator(',');
-			token_expect_integer_arg(length);
-			token_expect_seperator(':');
+		// case 'X':
+		// 	ptr_next += 1;
+		// 	token_expect_integer_arg(addr);
+		// 	token_expect_seperator(',');
+		// 	token_expect_integer_arg(length);
+		// 	token_expect_seperator(':');
 
-			/* Write Memory */
-			status = dbg_mem_write(ptr_next, token_remaining_buf,
-			                       addr, length, dbg_dec_bin);
-			if (status == EOF) {
-				goto error;
-			}
-			dbg_send_ok_packet(pkt_buf, sizeof(pkt_buf));
-			break;
+		// 	/* Write Memory */
+		// 	status = dbg_mem_write(ptr_next, token_remaining_buf,
+		// 	                       addr, length, dbg_dec_bin);
+		// 	if (status == EOF) {
+		// 		goto error;
+		// 	}
+		// 	dbg_send_ok_packet(pkt_buf, sizeof(pkt_buf));
+		// 	break;
 
 		/* 
 		 * Continue
 		 * Command Format: c [addr]
 		 */
-		case 'c':
-			dbg_continue();
-			return 0;
+		// case 'c':
+		// 	dbg_continue();
+		// 	return 0;
 
 		/*
 		 * Single-step
 		 * Command Format: s [addr]
 		 */
-		case 's':
-			dbg_step();
-			return 0;
+		// case 's':
+		// 	dbg_step();
+		// 	return 0;
 
-		case '?':
-			dbg_send_signal_packet(pkt_buf, sizeof(pkt_buf), state->signum);
-			break;
+		// case '?':
+		// 	dbg_send_signal_packet(pkt_buf, sizeof(pkt_buf), 0);
+		// 	break;
 
 		/*
 		 * Unsupported Command

@@ -1,4 +1,8 @@
+node_modules
+
 *.bin
 *.elf
 *.ld
 *.o
+
+*.z64

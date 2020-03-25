@@ -1,0 +1,18 @@
+{
+  "name": "gdbstub64",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "init": "libdragon install",
+    "stop": "libdragon stop",
+    "start": "libdragon start",
+    "prepare": "npm run init",
+    "build": "libdragon make -C ./arch_n64",
+    "clean": "libdragon make -- clean"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ed64": "^1.0.4"
+  }
+}
