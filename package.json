@@ -13,6 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ed64": "^1.0.4"
+    "ed64": "^1.0.5"
   }
 }
