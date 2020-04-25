@@ -1,5 +1,6 @@
 {
     "files.associations": {
         "gdbstub_sys.h": "c",
+        "gdbstub.h": "c"
     }
 }

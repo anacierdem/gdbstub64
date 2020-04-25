@@ -870,68 +870,68 @@ int dbg_main() // struct dbg_state *state
 		 * Read Memory
 		 * Command Format: m addr,length
 		 */
-		// case 'm':
-		// 	ptr_next += 1;
-		// 	token_expect_integer_arg(addr);
-		// 	token_expect_seperator(',');
-		// 	token_expect_integer_arg(length);
+		case 'm':
+			ptr_next += 1;
+			token_expect_integer_arg(addr);
+			token_expect_seperator(',');
+			token_expect_integer_arg(length);
 
-		// 	/* Read Memory */
-		// 	status = dbg_mem_read(pkt_buf, sizeof(pkt_buf),
-		// 	                      addr, length, dbg_enc_hex);
-		// 	if (status == EOF) {
-		// 		goto error;
-		// 	}
-		// 	dbg_send_packet(pkt_buf, status);
-		// 	break;
+			/* Read Memory */
+			status = dbg_mem_read(pkt_buf, sizeof(pkt_buf),
+			                      addr, length, dbg_enc_hex);
+			if (status == EOF) {
+				goto error;
+			}
+			dbg_send_packet(pkt_buf, status);
+			break;
 		
 		/*
 		 * Write Memory
 		 * Command Format: M addr,length:XX..
 		 */
-		// case 'M':
-		// 	ptr_next += 1;
-		// 	token_expect_integer_arg(addr);
-		// 	token_expect_seperator(',');
-		// 	token_expect_integer_arg(length);
-		// 	token_expect_seperator(':');
+		case 'M':
+			ptr_next += 1;
+			token_expect_integer_arg(addr);
+			token_expect_seperator(',');
+			token_expect_integer_arg(length);
+			token_expect_seperator(':');
 
-		// 	/* Write Memory */
-		// 	status = dbg_mem_write(ptr_next, token_remaining_buf,
-		// 	                       addr, length, dbg_dec_hex);
-		// 	if (status == EOF) {
-		// 		goto error;
-		// 	}
-		// 	dbg_send_ok_packet(pkt_buf, sizeof(pkt_buf));
-		// 	break;
+			/* Write Memory */
+			status = dbg_mem_write(ptr_next, token_remaining_buf,
+			                       addr, length, dbg_dec_hex);
+			if (status == EOF) {
+				goto error;
+			}
+			dbg_send_ok_packet(pkt_buf, sizeof(pkt_buf));
+			break;
 
 		/*
 		 * Write Memory (Binary)
 		 * Command Format: X addr,length:XX..
 		 */
-		// case 'X':
-		// 	ptr_next += 1;
-		// 	token_expect_integer_arg(addr);
-		// 	token_expect_seperator(',');
-		// 	token_expect_integer_arg(length);
-		// 	token_expect_seperator(':');
+		case 'X':
+			ptr_next += 1;
+			token_expect_integer_arg(addr);
+			token_expect_seperator(',');
+			token_expect_integer_arg(length);
+			token_expect_seperator(':');
 
-		// 	/* Write Memory */
-		// 	status = dbg_mem_write(ptr_next, token_remaining_buf,
-		// 	                       addr, length, dbg_dec_bin);
-		// 	if (status == EOF) {
-		// 		goto error;
-		// 	}
-		// 	dbg_send_ok_packet(pkt_buf, sizeof(pkt_buf));
-		// 	break;
+			/* Write Memory */
+			status = dbg_mem_write(ptr_next, token_remaining_buf,
+			                       addr, length, dbg_dec_bin);
+			if (status == EOF) {
+				goto error;
+			}
+			dbg_send_ok_packet(pkt_buf, sizeof(pkt_buf));
+			break;
 
 		/* 
 		 * Continue
 		 * Command Format: c [addr]
 		 */
-		// case 'c':
-		// 	dbg_continue();
-		// 	return 0;
+		case 'c':
+			dbg_continue();
+			return 0;
 
 		/*
 		 * Single-step

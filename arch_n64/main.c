@@ -21,16 +21,11 @@ int main(void)
     display_init( res, bit, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE );
 
     everdrive_init(false);
-    // dbg_start();
 
-    dbg_main();
-
-    dbg_sys_putchar('!');
+    dbg_start();
 
     while(1)
     {
-        // dbg_sys_putchar('\n');
-
-        // handle_everdrive();
+        handle_everdrive();
     }
 }

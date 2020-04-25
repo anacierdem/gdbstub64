@@ -21,170 +21,14 @@
 
 #include "../gdbstub.h"
 
-#ifdef __STRICT_ANSI__
-#define asm __asm__
-#endif
-
-#define SERIAL_COM1 0x3f8
-#define SERIAL_COM2 0x2f8
-#define SERIAL_PORT SERIAL_COM1
-
-#define NUM_IDT_ENTRIES 32
-
-/*****************************************************************************
- * BSS Data
- ****************************************************************************/
-
-static struct dbg_idt_gate dbg_idt_gates[NUM_IDT_ENTRIES];
-static struct dbg_state    dbg_state;
-
-/*****************************************************************************
- * Misc. Functions
- ****************************************************************************/
-
-void *dbg_sys_memset(void *ptr, int data, size_t len)
-{
-	char *p = ptr;
-
-	while (len--) {
-		*p++ = (char)data;
-	}
-
-	return ptr;
-}
-
-/*
- * Get current code segment (CS register).
- */
-uint32_t dbg_get_cs(void)
-{
-	uint32_t cs;
-
-	// asm volatile (
-	// 	"push    %%cs;"
-	// 	"pop     %%eax;"
-	// 	/* Outputs  */ : "=a" (cs)
-	// 	/* Inputs   */ : /* None */
-	// 	/* Clobbers */ : /* None */
-	// 	);
-
-	return cs;
-}
-
-/*****************************************************************************
- * Interrupt Management Functions
- ****************************************************************************/
-
-/*
- * Initialize idt_gates with the interrupt handlers.
- */
-int dbg_init_gates(void)
-{
-	size_t   i;
-	uint16_t cs;
-
-	cs = dbg_get_cs();
-	for (i = 0; i < NUM_IDT_ENTRIES; i++) {
-		dbg_idt_gates[i].flags       = 0x8E00;
-		dbg_idt_gates[i].segment     = cs;
-		dbg_idt_gates[i].offset_low  =
-			((uint32_t)dbg_int_handlers[i]      ) & 0xffff;
-		dbg_idt_gates[i].offset_high =
-			((uint32_t)dbg_int_handlers[i] >> 16) & 0xffff;
-	}
-
-	return 0;
-}
-
-/*
- * Hook a vector of the current IDT.
- */
-int dbg_hook_idt(uint8_t vector, const void *function)
-{
-	struct dbg_idtr      idtr;
-	struct dbg_idt_gate *gates;
-
-	gates = (struct dbg_idt_gate *)idtr.offset;
-	gates[vector].flags       = 0x8E00;
-	gates[vector].segment     = dbg_get_cs();
-	gates[vector].offset_low  = (((uint32_t)function)      ) & 0xffff;
-	gates[vector].offset_high = (((uint32_t)function) >> 16) & 0xffff;
-
-	return 0;
-}
-
-/*
- * Initialize IDT gates and load the new IDT.
- */
-int dbg_init_idt(void)
-{
-	struct dbg_idtr idtr;
-
-	dbg_init_gates();
-	idtr.len = sizeof(dbg_idt_gates)-1;
-	idtr.offset = (uint32_t)dbg_idt_gates;
-	return 0;
-}
-
 /*
  * Common interrupt handler routine.
  */
-void dbg_int_handler(struct dbg_interrupt_state *istate)
+void dbg_int_handler(exception_t* e)
 {
-	dbg_interrupt(istate);
+	// TODO: convert the exception
+	dbg_main();
 }
-
-/*
- * Debug interrupt handler.
- */
-void dbg_interrupt(struct dbg_interrupt_state *istate)
-{
-	dbg_sys_memset(&dbg_state.registers, 0, sizeof(dbg_state.registers));
-
-	dbg_state.signum = istate->vector;
-
-	/* Load Registers */
-	// dbg_state.registers[DBG_CPU_I386_REG_EAX] = istate->eax;
-	// dbg_state.registers[DBG_CPU_I386_REG_ECX] = istate->ecx;
-	// dbg_state.registers[DBG_CPU_I386_REG_EDX] = istate->edx;
-	// dbg_state.registers[DBG_CPU_I386_REG_EBX] = istate->ebx;
-	// dbg_state.registers[DBG_CPU_I386_REG_ESP] = istate->esp;
-	// dbg_state.registers[DBG_CPU_I386_REG_EBP] = istate->ebp;
-	// dbg_state.registers[DBG_CPU_I386_REG_ESI] = istate->esi;
-	// dbg_state.registers[DBG_CPU_I386_REG_EDI] = istate->edi;
-	// dbg_state.registers[DBG_CPU_I386_REG_PC]  = istate->eip;
-	// dbg_state.registers[DBG_CPU_I386_REG_CS]  = istate->cs;
-	// dbg_state.registers[DBG_CPU_I386_REG_PS]  = istate->eflags;
-	// dbg_state.registers[DBG_CPU_I386_REG_SS]  = istate->ss;
-	// dbg_state.registers[DBG_CPU_I386_REG_DS]  = istate->ds;
-	// dbg_state.registers[DBG_CPU_I386_REG_ES]  = istate->es;
-	// dbg_state.registers[DBG_CPU_I386_REG_FS]  = istate->fs;
-	// dbg_state.registers[DBG_CPU_I386_REG_GS]  = istate->gs;
-
-	dbg_main(&dbg_state);
-
-	/* Restore Registers */
-	// istate->eax    = dbg_state.registers[DBG_CPU_I386_REG_EAX];
-	// istate->ecx    = dbg_state.registers[DBG_CPU_I386_REG_ECX];
-	// istate->edx    = dbg_state.registers[DBG_CPU_I386_REG_EDX];
-	// istate->ebx    = dbg_state.registers[DBG_CPU_I386_REG_EBX];
-	// istate->esp    = dbg_state.registers[DBG_CPU_I386_REG_ESP];
-	// istate->ebp    = dbg_state.registers[DBG_CPU_I386_REG_EBP];
-	// istate->esi    = dbg_state.registers[DBG_CPU_I386_REG_ESI];
-	// istate->edi    = dbg_state.registers[DBG_CPU_I386_REG_EDI];
-	// istate->eip    = dbg_state.registers[DBG_CPU_I386_REG_PC];
-	// istate->cs     = dbg_state.registers[DBG_CPU_I386_REG_CS];
-	// istate->eflags = dbg_state.registers[DBG_CPU_I386_REG_PS];
-	// istate->ss     = dbg_state.registers[DBG_CPU_I386_REG_SS];
-	// istate->ds     = dbg_state.registers[DBG_CPU_I386_REG_DS];
-	// istate->es     = dbg_state.registers[DBG_CPU_I386_REG_ES];
-	// istate->fs     = dbg_state.registers[DBG_CPU_I386_REG_FS];
-	// istate->gs     = dbg_state.registers[DBG_CPU_I386_REG_GS];
-}
-
-#define SERIAL_THR 0
-#define SERIAL_RBR 0
-#define SERIAL_LSR 5
 
 volatile unsigned long long rx_buffer[128];
 volatile unsigned long long tx_buffer[128];
@@ -260,7 +104,8 @@ int dbg_sys_mem_writeb(address addr, char val)
  */
 int dbg_sys_continue(void)
 {
-	// dbg_state.registers[DBG_CPU_I386_REG_PS] &= ~(1<<8);
+	// Return to next instruction
+    asm ("mfc0 $2,$14\naddi $2,0x4\nmtc0 $2,$14");
 	return 0;
 }
 
@@ -269,22 +114,15 @@ int dbg_sys_continue(void)
  */
 int dbg_sys_step(void)
 {
-	// dbg_state.registers[DBG_CPU_I386_REG_PS] |= 1<<8;
 	return 0;
 }
 
 /*
  * Debugger init function.
  *
- * Hooks the IDT to enable debugging.
  */
 void dbg_start(void)
 {
-	// everdrive_init(false);
-	/* Hook current IDT. */
-	// dbg_hook_idt(1, dbg_int_handlers[1]);
-	// dbg_hook_idt(3, dbg_int_handlers[3]);
-
-	/* Interrupt to start debugging. */
-	// asm volatile ("int3");
+	register_exception_handler(dbg_int_handler);
+	BREAK;
 }

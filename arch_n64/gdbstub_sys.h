@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <libdragon.h>
+
 /* Define the size_t type */
 #define DBG_DEFINE_SIZET 1
 
@@ -39,46 +41,7 @@ typedef unsigned int size_t;
 typedef unsigned int address;
 typedef unsigned int reg;
 
-#pragma pack(1)
-struct dbg_interrupt_state {
-	uint32_t ss;
-	uint32_t gs;
-	uint32_t fs;
-	uint32_t es;
-	uint32_t ds;
-	uint32_t edi;
-	uint32_t esi;
-	uint32_t ebp;
-	uint32_t esp;
-	uint32_t ebx;
-	uint32_t edx;
-	uint32_t ecx;
-	uint32_t eax;
-	uint32_t vector;
-	uint32_t error_code;
-	uint32_t eip;
-	uint32_t cs;
-	uint32_t eflags;
-};
-#pragma pack()
-
-#pragma pack(1)
-struct dbg_idtr
-{
-	uint16_t len;
-	uint32_t offset;
-};
-#pragma pack()
-
-#pragma pack(1)
-struct dbg_idt_gate
-{
-	uint16_t offset_low;
-	uint16_t segment;
-	uint16_t flags;
-	uint16_t offset_high;
-};
-#pragma pack()
+#define BREAK asm volatile ("break")
 
 enum DBG_REGISTER {
 	DBG_CPU_VR4300_REG_ZERO       = 0,
@@ -113,31 +76,17 @@ enum DBG_REGISTER {
 	DBG_CPU_VR4300_REG_SP       = 29,
 	DBG_CPU_VR4300_REG_FP       = 30,
 	DBG_CPU_VR4300_REG_RA       = 31,
-	DBG_CPU_I386_NUM_REGISTERS 	= 32
+	DBG_CPU_VR4300_NUM_REGISTERS 	= 32
 };
 
 struct dbg_state {
 	int signum;
-	reg registers[DBG_CPU_I386_NUM_REGISTERS];
+	reg registers[DBG_CPU_VR4300_NUM_REGISTERS];
 };
-
-/*****************************************************************************
- * Const Data
- ****************************************************************************/
-
-extern void const * const dbg_int_handlers[];
 
 /*****************************************************************************
  * Prototypes
  ****************************************************************************/
 
-int dbg_hook_idt(uint8_t vector, const void *function);
-int dbg_init_gates(void);
-int dbg_init_idt(void);
-uint32_t dbg_get_cs(void);
-void dbg_int_handler(struct dbg_interrupt_state *istate);
-void dbg_interrupt(struct dbg_interrupt_state *istate);
+void dbg_interrupt(exception_t* e);
 void dbg_start(void);
-void dbg_io_write_8(uint16_t port, uint8_t val);
-uint8_t dbg_io_read_8(uint16_t port);
-void *dbg_sys_memset(void *ptr, int data, size_t len);
